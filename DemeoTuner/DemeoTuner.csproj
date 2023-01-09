@@ -36,27 +36,27 @@
   <ItemGroup>
     <Reference Include="0Harmony, Version=2.9.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Games\Demeo - PC Edition\MelonLoader\0Harmony.dll</HintPath>
+      <HintPath>$(DemeoGame)\MelonLoader\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Games\Demeo - PC Edition\demeo_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(DemeoGame)\demeo_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="MelonLoader, Version=0.5.7.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Games\Demeo - PC Edition\MelonLoader\MelonLoader.dll</HintPath>
+      <HintPath>$(DemeoGame)\MelonLoader\MelonLoader.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Games\Demeo - PC Edition\demeo_Data\Managed\Newtonsoft.Json.dll</HintPath>
+      <HintPath>$(DemeoGame)\demeo_Data\Managed\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="ResolutionGames.Localization, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Games\Demeo - PC Edition\demeo_Data\Managed\ResolutionGames.Localization.dll</HintPath>
+      <HintPath>$(DemeoGame)\demeo_Data\Managed\ResolutionGames.Localization.dll</HintPath>
     </Reference>
     <Reference Include="ResolutionGames.Singleton, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Games\Demeo - PC Edition\demeo_Data\Managed\ResolutionGames.Singleton.dll</HintPath>
+      <HintPath>$(DemeoGame)\demeo_Data\Managed\ResolutionGames.Singleton.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -68,11 +68,11 @@
     <Reference Include="System.Xml" />
     <Reference Include="Unity.Mathematics, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Games\Demeo - PC Edition\demeo_Data\Managed\Unity.Mathematics.dll</HintPath>
+      <HintPath>$(DemeoGame)\demeo_Data\Managed\Unity.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Games\Demeo - PC Edition\demeo_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(DemeoGame)\demeo_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -86,7 +86,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>copy /Y "$(TargetPath)" "..\..\..\Mods"
+copy /Y "$(TargetPath)" "$(DemeoGame)\Mods"</PostBuildEvent>
   </PropertyGroup>
 </Project>

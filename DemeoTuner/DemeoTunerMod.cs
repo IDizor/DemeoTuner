@@ -5,6 +5,7 @@ using System.Reflection;
 using Boardgame;
 using Boardgame.BoardEntities;
 using Boardgame.BoardEntities.Abilities;
+using Boardgame.BoardgameActions;
 using Boardgame.Data;
 using Boardgame.GameplayEffects;
 using Boardgame.NonVR.Save;
@@ -24,7 +25,7 @@ namespace DemeoTuner
         public const string Description = "Do not auto-delete saves, mass Courage Shanty, and more.";
         public const string Author = "IDizor";
         public const string Company = "IDizor";
-        public const string Version = "1.0.0";
+        public const string Version = "1.1";
         public const string DownloadLink = "https://github.com/IDizor/DemeoTuner/releases";
     }
 
@@ -207,6 +208,165 @@ namespace DemeoTuner
             }
         }
         
+        /// <summary>
+        /// Applies settings for heroes.
+        /// </summary>
+        [HarmonyPatch(typeof(Piece), "CreatePiece")]
+        public class Piece_CreatePiece
+        {
+            public static void Postfix(ref Piece __result)
+            {
+                ApplyHeroSettings(__result, false);
+            }
+        }
+
+        /// <summary>
+        /// Applies settings for heroes when game loaded from save.
+        /// </summary>
+        [HarmonyPatch(typeof(Piece), "Deserialize")]
+        public class Piece_Deserialize
+        {
+            public static void Postfix(ref Piece __result)
+            {
+                ApplyHeroSettings(__result, true);
+            }
+        }
+
+        /// <summary>
+        /// Allows reconnected players to make a turn.
+        /// </summary>
+        [HarmonyPatch(typeof(Piece), "EnableEffectState")]
+        public class Piece_EnableEffectState
+        {
+            public static bool Prefix(EffectStateType effectState, ref bool __result)
+            {
+                if (Settings.AllowReconnectedPlayersToPlayCurrentTurn &&
+                    effectState == EffectStateType.SummoningSickness &&
+                    GetCallerMethodName() == nameof(BoardgameActionRecreateReconnectedPlayerPiece.RecreatePlayerPiece))
+                {
+                    __result = true;
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        /*
+        /// <summary>
+        /// Saves heroes to files.
+        /// </summary>
+        [HarmonyPatch(typeof(GameDataAPI), "Init")]
+        public class GameDataAPI_Init
+        {
+            public static void Postfix(ref GameDataAPI __instance)
+            {
+                foreach (var p in __instance.PieceConfig[GameConfigType.Elven])
+                {
+                    if (p.Key.ToString().StartsWith("Hero"))
+                    {
+                        System.IO.File.WriteAllText($"D:\\_{p.Key}.json", JsonHelper.Serialize(p.Value, 3));
+                    }
+                }
+            }
+        }
+        */
+
+        /*
+        /// <summary>
+        /// Invulnerable mode.
+        /// </summary>
+        [HarmonyPatch(typeof(EffectSink), "SubtractHealth")]
+        public class EffectSink_SubtractHealth
+        {
+            public static void Prefix(ref float amount, int ___ownerPieceId)
+            {
+                var piece = StatusEffect.pieceAndTurnController.GetPiece(___ownerPieceId);
+                if (piece != null && piece.IsPlayer())
+                {
+                    amount = -1;
+                }
+            }
+        }
+        */
+
+        private static void ApplyHeroSettings(Piece hero, bool isDeserialize)
+        {
+            var stats = hero.effectSink;
+            switch (hero.boardPieceId)
+            {
+                case BoardPieceId.HeroGuardian:
+                    stats.TrySetStatMaxValue(Stats.Type.Health,         Settings.Guardian_Health);
+                    stats.TrySetStatBaseValue(Stats.Type.MoveRange,     Settings.Guardian_MoveRange);
+                    stats.TrySetStatBaseValue(Stats.Type.AttackDamage,  Settings.Guardian_AttackDamage);
+                    stats.TrySetStatBaseValue(Stats.Type.CritDamage,    Settings.Guardian_CritDamage);
+                    if (!isDeserialize)
+                    {
+                        stats.TrySetStatBaseValue(Stats.Type.Health,    Settings.Guardian_Health);
+                    }
+                    break;
+                case BoardPieceId.HeroHunter:
+                    stats.TrySetStatMaxValue(Stats.Type.Health,         Settings.Hunter_Health);
+                    stats.TrySetStatBaseValue(Stats.Type.MoveRange,     Settings.Hunter_MoveRange);
+                    stats.TrySetStatBaseValue(Stats.Type.AttackDamage,  Settings.Hunter_AttackDamage);
+                    stats.TrySetStatBaseValue(Stats.Type.CritDamage,    Settings.Hunter_CritDamage);
+                    if (!isDeserialize)
+                    {
+                        stats.TrySetStatBaseValue(Stats.Type.Health,    Settings.Hunter_Health);
+                    }
+                    break;
+                case BoardPieceId.HeroRogue:
+                    stats.TrySetStatMaxValue(Stats.Type.Health,         Settings.Rogue_Health);
+                    stats.TrySetStatBaseValue(Stats.Type.MoveRange,     Settings.Rogue_MoveRange);
+                    stats.TrySetStatBaseValue(Stats.Type.AttackDamage,  Settings.Rogue_AttackDamage);
+                    stats.TrySetStatBaseValue(Stats.Type.CritDamage,    Settings.Rogue_CritDamage);
+                    if (!isDeserialize)
+                    {
+                        stats.TrySetStatBaseValue(Stats.Type.Health,    Settings.Rogue_Health);
+                    }
+                    break;
+                case BoardPieceId.HeroSorcerer:
+                    stats.TrySetStatMaxValue(Stats.Type.Health,         Settings.Sorcerer_Health);
+                    stats.TrySetStatBaseValue(Stats.Type.MoveRange,     Settings.Sorcerer_MoveRange);
+                    stats.TrySetStatBaseValue(Stats.Type.AttackDamage,  Settings.Sorcerer_AttackDamage);
+                    stats.TrySetStatBaseValue(Stats.Type.CritDamage,    Settings.Sorcerer_CritDamage);
+                    if (!isDeserialize)
+                    {
+                        stats.TrySetStatBaseValue(Stats.Type.Health,    Settings.Sorcerer_Health);
+                    }
+                    break;
+                case BoardPieceId.HeroBard:
+                    stats.TrySetStatMaxValue(Stats.Type.Health,         Settings.Bard_Health);
+                    stats.TrySetStatBaseValue(Stats.Type.MoveRange,     Settings.Bard_MoveRange);
+                    stats.TrySetStatBaseValue(Stats.Type.AttackDamage,  Settings.Bard_AttackDamage);
+                    stats.TrySetStatBaseValue(Stats.Type.CritDamage,    Settings.Bard_CritDamage);
+                    if (!isDeserialize)
+                    {
+                        stats.TrySetStatBaseValue(Stats.Type.Health,    Settings.Bard_Health);
+                    }
+                    break;
+                case BoardPieceId.HeroWarlock:
+                    stats.TrySetStatMaxValue(Stats.Type.Health,         Settings.Warlock_Health);
+                    stats.TrySetStatBaseValue(Stats.Type.MoveRange,     Settings.Warlock_MoveRange);
+                    stats.TrySetStatBaseValue(Stats.Type.AttackDamage,  Settings.Warlock_AttackDamage);
+                    stats.TrySetStatBaseValue(Stats.Type.CritDamage,    Settings.Warlock_CritDamage);
+                    if (!isDeserialize)
+                    {
+                        stats.TrySetStatBaseValue(Stats.Type.Health,    Settings.Warlock_Health);
+                    }
+                    break;
+                case BoardPieceId.HeroBarbarian:
+                    stats.TrySetStatMaxValue(Stats.Type.Health,         Settings.Barbarian_Health);
+                    stats.TrySetStatBaseValue(Stats.Type.MoveRange,     Settings.Barbarian_MoveRange);
+                    stats.TrySetStatBaseValue(Stats.Type.AttackDamage,  Settings.Barbarian_AttackDamage);
+                    stats.TrySetStatBaseValue(Stats.Type.CritDamage,    Settings.Barbarian_CritDamage);
+                    if (!isDeserialize)
+                    {
+                        stats.TrySetStatBaseValue(Stats.Type.Health,    Settings.Barbarian_Health);
+                    }
+                    break;
+            }
+        }
+
         private static string GetCallerMethodName(int index = 3)
         {
             var stackTrace = new StackTrace();
