@@ -6,6 +6,7 @@ Configurable mod features:
 - Disable auto-delete for saved checkpoints;
 - Mass effect for Courage Shanty bard ability;
 - No penalty for Healing Potion for downed allies;
+- Disconnected player can make a turn when reconnected;
 - and more.
 
 ## Installation
@@ -27,11 +28,47 @@ The `DemeoTuner.json` file example:
 {
   "MenuQuitGameWithNoConfirmation": true,
   "AutoDeleteSavedCheckpoints": false,
+  "AllowReconnectedPlayersToPlayCurrentTurn": true,
   "HealingPotion_NoPenaltyForDowned": true,
+          
+  "Guardian_Health": 10,
+  "Guardian_MoveRange": 4,
+  "Guardian_AttackDamage": 3,
+  "Guardian_CritDamage": 6,
+  
+  "Hunter_Health": 10,
+  "Hunter_MoveRange": 4,
+  "Hunter_AttackDamage": 3,
+  "Hunter_CritDamage": 5,
+  
+  "Rogue_Health": 10,
+  "Rogue_MoveRange": 4,
+  "Rogue_AttackDamage": 3,
+  "Rogue_CritDamage": 8,
+  
+  "Sorcerer_Health": 10,
+  "Sorcerer_MoveRange": 4,
+  "Sorcerer_AttackDamage": 2,
+  "Sorcerer_CritDamage": 5,
+  
+  "Bard_Health": 10,
+  "Bard_MoveRange": 4,
+  "Bard_AttackDamage": 3,
+  "Bard_CritDamage": 6,
   "Bard_CourageShanty_MassEffect": true,
-  "Bard_CourageShanty_MassEffect_Radius": 4,
   "Bard_CourageShanty_MassEffect_VisibleAreaOnly": false,
+  "Bard_CourageShanty_MassEffect_Radius": 4,
   "Bard_SongOfRecovery_Radius": 2,
-  "Bard_SongOfResilience_Radius": 2
+  "Bard_SongOfResilience_Radius": 2,
+  
+  "Warlock_Health": 10,
+  "Warlock_MoveRange": 4,
+  "Warlock_AttackDamage": 2,
+  "Warlock_CritDamage": 5,
+  
+  "Barbarian_Health": 10,
+  "Barbarian_MoveRange": 4,
+  "Barbarian_AttackDamage": 4,
+  "Barbarian_CritDamage": 8
 }
 ```
