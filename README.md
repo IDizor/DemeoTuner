@@ -7,6 +7,7 @@ Configurable mod features:
 - Mass effect for Courage Shanty bard ability;
 - No penalty for Healing Potion for downed allies;
 - Disconnected player can make a turn when reconnected;
+- Added limit for spawning extra enemies on a level.
 - and more.
 
 ## Installation
@@ -30,6 +31,7 @@ The `DemeoTuner.json` file example:
   "AutoDeleteSavedCheckpoints": false,
   "AllowReconnectedPlayersToPlayCurrentTurn": true,
   "HealingPotion_NoPenaltyForDowned": true,
+  "ExtraEnemiesSpawnLimit": 20,
           
   "Guardian_Health": 10,
   "Guardian_MoveRange": 4,
@@ -40,6 +42,8 @@ The `DemeoTuner.json` file example:
   "Hunter_MoveRange": 4,
   "Hunter_AttackDamage": 3,
   "Hunter_CritDamage": 5,
+  "Hunter_Arrow_TargetDamage": 3,
+  "Hunter_Arrow_CritDamage": 6,
   
   "Rogue_Health": 10,
   "Rogue_MoveRange": 4,
