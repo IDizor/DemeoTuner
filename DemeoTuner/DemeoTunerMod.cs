@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -10,6 +11,8 @@ using Boardgame.Data;
 using Boardgame.GameplayEffects;
 using Boardgame.NonVR.Save;
 using Boardgame.Sequence;
+using Boardgame.SerializableEvents;
+using Boardgame.Social;
 using Boardgame.Ui.LobbyMenu;
 using DataKeys;
 using HarmonyLib;
@@ -25,7 +28,7 @@ namespace DemeoTuner
         public const string Description = "Do not auto-delete saves, mass Courage Shanty, and more.";
         public const string Author = "IDizor";
         public const string Company = "IDizor";
-        public const string Version = "1.1";
+        public const string Version = "1.2";
         public const string DownloadLink = "https://github.com/IDizor/DemeoTuner/releases";
     }
 
@@ -33,6 +36,7 @@ namespace DemeoTuner
     {
         internal static readonly MelonLogger.Instance Logger = new MelonLogger.Instance(nameof(DemeoTuner));
         private static bool useChessboardDistance = false;
+        private static int extraEnemiesSpawnCounter = 0;
         
         /// <summary>
         /// Initialize mod.
@@ -42,7 +46,7 @@ namespace DemeoTuner
             var harmony = new HarmonyLib.Harmony(GetType().ToString());
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
-
+        
         /// <summary>
         /// Do not auto-delete saved games.
         /// </summary>
@@ -104,7 +108,6 @@ namespace DemeoTuner
                 {
                     if (abilityStore.TryGetValue(AbilityKey.HealingPotion, out Ability ability))
                     {
-                        //File.WriteAllText($"D:\\_{ability.abilityKey}.json", JsonHelper.Serialize(ability, 3));
                         ability.abilityHeal = SetStructField(ability.abilityHeal, "overrideIfDowned", false);
                     }
                 }
@@ -127,6 +130,13 @@ namespace DemeoTuner
                     if (abilityStore.TryGetValue(AbilityKey.SongOfResilience, out Ability ability))
                     {
                         ability.areaOfEffectRange = Settings.Bard_SongOfResilience_Radius;
+                    }
+                }
+                {
+                    if (abilityStore.TryGetValue(AbilityKey.Arrow, out Ability ability))
+                    {
+                        ability.abilityDamage.targetDamage = Settings.Hunter_Arrow_TargetDamage;
+                        ability.abilityDamage.critDamage = Settings.Hunter_Arrow_CritDamage;
                     }
                 }
             }
@@ -251,6 +261,43 @@ namespace DemeoTuner
             }
         }
 
+        /// <summary>
+        /// Counts spawn events for extra enemy groups.
+        /// </summary>
+        [HarmonyPatch(typeof(SerializableEventUpdateFogAndSpawn), "CreateBoardgameAction")]
+        public class SerializableEventUpdateFogAndSpawn_CreateBoardgameAction
+        {
+            public static bool Prefix(SerializableEventUpdateFogAndSpawn __instance, ref BoardgameAction __result)
+            {
+                if (Settings.ExtraEnemiesSpawnLimit >= 0)
+                {
+                    extraEnemiesSpawnCounter++;
+                    if (extraEnemiesSpawnCounter > Settings.ExtraEnemiesSpawnLimit)
+                    {
+                        var gameContext = (GameContext)AccessTools.Field(typeof(SerializableEventUpdateFogAndSpawn), "gameContext").GetValue(__instance);
+                        __result = new BoardgameActionUpdateFog(gameContext, __instance.RandomSeed);
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Resets spawn counter for extra enemy grops.
+        /// </summary>
+        [HarmonyPatch(typeof(PlayWithFriendsController), "OnEnterGameState")]
+        public class PlayWithFriendsController_OnEnterGameState
+        {
+            public static void Postfix(GameStates newState)
+            {
+                if (newState == GameStates.PlayingState)
+                {
+                    extraEnemiesSpawnCounter = 0;
+                }
+            }
+        }
+
         /*
         /// <summary>
         /// Saves heroes to files.
@@ -292,10 +339,12 @@ namespace DemeoTuner
         private static void ApplyHeroSettings(Piece hero, bool isDeserialize)
         {
             var stats = hero.effectSink;
+            stats.TryGetStatMaxUnscaled(Stats.Type.Health, out int maxHP);
+
             switch (hero.boardPieceId)
             {
                 case BoardPieceId.HeroGuardian:
-                    stats.TrySetStatMaxValue(Stats.Type.Health,         Settings.Guardian_Health);
+                    stats.TrySetStatMaxValue(Stats.Type.Health,         Math.Max(Settings.Guardian_Health, maxHP));
                     stats.TrySetStatBaseValue(Stats.Type.MoveRange,     Settings.Guardian_MoveRange);
                     stats.TrySetStatBaseValue(Stats.Type.AttackDamage,  Settings.Guardian_AttackDamage);
                     stats.TrySetStatBaseValue(Stats.Type.CritDamage,    Settings.Guardian_CritDamage);
@@ -305,7 +354,7 @@ namespace DemeoTuner
                     }
                     break;
                 case BoardPieceId.HeroHunter:
-                    stats.TrySetStatMaxValue(Stats.Type.Health,         Settings.Hunter_Health);
+                    stats.TrySetStatMaxValue(Stats.Type.Health,         Math.Max(Settings.Hunter_Health, maxHP));
                     stats.TrySetStatBaseValue(Stats.Type.MoveRange,     Settings.Hunter_MoveRange);
                     stats.TrySetStatBaseValue(Stats.Type.AttackDamage,  Settings.Hunter_AttackDamage);
                     stats.TrySetStatBaseValue(Stats.Type.CritDamage,    Settings.Hunter_CritDamage);
@@ -315,7 +364,7 @@ namespace DemeoTuner
                     }
                     break;
                 case BoardPieceId.HeroRogue:
-                    stats.TrySetStatMaxValue(Stats.Type.Health,         Settings.Rogue_Health);
+                    stats.TrySetStatMaxValue(Stats.Type.Health,         Math.Max(Settings.Rogue_Health, maxHP));
                     stats.TrySetStatBaseValue(Stats.Type.MoveRange,     Settings.Rogue_MoveRange);
                     stats.TrySetStatBaseValue(Stats.Type.AttackDamage,  Settings.Rogue_AttackDamage);
                     stats.TrySetStatBaseValue(Stats.Type.CritDamage,    Settings.Rogue_CritDamage);
@@ -325,7 +374,7 @@ namespace DemeoTuner
                     }
                     break;
                 case BoardPieceId.HeroSorcerer:
-                    stats.TrySetStatMaxValue(Stats.Type.Health,         Settings.Sorcerer_Health);
+                    stats.TrySetStatMaxValue(Stats.Type.Health,         Math.Max(Settings.Sorcerer_Health, maxHP));
                     stats.TrySetStatBaseValue(Stats.Type.MoveRange,     Settings.Sorcerer_MoveRange);
                     stats.TrySetStatBaseValue(Stats.Type.AttackDamage,  Settings.Sorcerer_AttackDamage);
                     stats.TrySetStatBaseValue(Stats.Type.CritDamage,    Settings.Sorcerer_CritDamage);
@@ -335,7 +384,7 @@ namespace DemeoTuner
                     }
                     break;
                 case BoardPieceId.HeroBard:
-                    stats.TrySetStatMaxValue(Stats.Type.Health,         Settings.Bard_Health);
+                    stats.TrySetStatMaxValue(Stats.Type.Health,         Math.Max(Settings.Bard_Health, maxHP));
                     stats.TrySetStatBaseValue(Stats.Type.MoveRange,     Settings.Bard_MoveRange);
                     stats.TrySetStatBaseValue(Stats.Type.AttackDamage,  Settings.Bard_AttackDamage);
                     stats.TrySetStatBaseValue(Stats.Type.CritDamage,    Settings.Bard_CritDamage);
@@ -345,7 +394,7 @@ namespace DemeoTuner
                     }
                     break;
                 case BoardPieceId.HeroWarlock:
-                    stats.TrySetStatMaxValue(Stats.Type.Health,         Settings.Warlock_Health);
+                    stats.TrySetStatMaxValue(Stats.Type.Health,         Math.Max(Settings.Warlock_Health, maxHP));
                     stats.TrySetStatBaseValue(Stats.Type.MoveRange,     Settings.Warlock_MoveRange);
                     stats.TrySetStatBaseValue(Stats.Type.AttackDamage,  Settings.Warlock_AttackDamage);
                     stats.TrySetStatBaseValue(Stats.Type.CritDamage,    Settings.Warlock_CritDamage);
@@ -355,7 +404,7 @@ namespace DemeoTuner
                     }
                     break;
                 case BoardPieceId.HeroBarbarian:
-                    stats.TrySetStatMaxValue(Stats.Type.Health,         Settings.Barbarian_Health);
+                    stats.TrySetStatMaxValue(Stats.Type.Health,         Math.Max(Settings.Barbarian_Health, maxHP));
                     stats.TrySetStatBaseValue(Stats.Type.MoveRange,     Settings.Barbarian_MoveRange);
                     stats.TrySetStatBaseValue(Stats.Type.AttackDamage,  Settings.Barbarian_AttackDamage);
                     stats.TrySetStatBaseValue(Stats.Type.CritDamage,    Settings.Barbarian_CritDamage);
@@ -367,10 +416,36 @@ namespace DemeoTuner
             }
         }
 
-        private static string GetCallerMethodName(int index = 3)
+        private static string GetCallerMethodName(int index = 0)
+        {
+            index += 3;
+            var stackTrace = new StackTrace();
+            if (stackTrace.FrameCount < index)
+            {
+                return string.Empty;
+            }
+            return stackTrace.GetFrame(index).GetMethod().Name;
+        }
+
+        private static Type GetCallerType(int index = 0)
+        {
+            index += 3;
+            var stackTrace = new StackTrace();
+            if (stackTrace.FrameCount < index)
+            {
+                return typeof(Type);
+            }
+            return stackTrace.GetFrame(index).GetMethod().DeclaringType;
+        }
+
+        private static string GetCallStackPath()
         {
             var stackTrace = new StackTrace();
-            return stackTrace.GetFrame(index).GetMethod().Name;
+            var path = string.Join(" <-- ", stackTrace.GetFrames()
+                .Skip(3)
+                .Select(f => f.GetMethod())
+                .Select(m => m.DeclaringType.Name + "." + m.Name + "()"));
+            return path;
         }
 
         private static KeyValuePair<string, object>[] GetFieldsValues<T>(T obj)

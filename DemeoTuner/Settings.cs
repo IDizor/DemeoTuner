@@ -14,6 +14,7 @@ namespace DemeoTuner
         public static bln AutoDeleteSavedCheckpoints = false;
         public static bln AllowReconnectedPlayersToPlayCurrentTurn = true;
         public static bln HealingPotion_NoPenaltyForDowned = true;
+        public static int ExtraEnemiesSpawnLimit = 20;
         
         public static int Guardian_Health = 10;
         public static int Guardian_MoveRange = 4;
@@ -24,6 +25,8 @@ namespace DemeoTuner
         public static int Hunter_MoveRange = 4;
         public static int Hunter_AttackDamage = 3;
         public static int Hunter_CritDamage = 5;
+        public static int Hunter_Arrow_TargetDamage = 3;
+        public static int Hunter_Arrow_CritDamage = 6;
 
         public static int Rogue_Health = 10;
         public static int Rogue_MoveRange = 4;
@@ -57,6 +60,7 @@ namespace DemeoTuner
 
         static Settings()
         {
+            // load settings from json file
             var path = Path.ChangeExtension(Assembly.GetExecutingAssembly().Location, "json");
             if (File.Exists(path))
             {

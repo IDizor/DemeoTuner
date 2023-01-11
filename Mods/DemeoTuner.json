@@ -3,6 +3,7 @@
   "AutoDeleteSavedCheckpoints": false,
   "AllowReconnectedPlayersToPlayCurrentTurn": true,
   "HealingPotion_NoPenaltyForDowned": true,
+  "ExtraEnemiesSpawnLimit": 20,
           
   "Guardian_Health": 10,
   "Guardian_MoveRange": 4,
@@ -13,6 +14,8 @@
   "Hunter_MoveRange": 4,
   "Hunter_AttackDamage": 3,
   "Hunter_CritDamage": 5,
+  "Hunter_Arrow_TargetDamage": 3,
+  "Hunter_Arrow_CritDamage": 6,
   
   "Rogue_Health": 10,
   "Rogue_MoveRange": 4,
