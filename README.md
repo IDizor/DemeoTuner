@@ -1,6 +1,6 @@
 # DemeoTuner
 
-Demeo game mod. Requires [MelonLoader](https://github.com/LavaGang/MelonLoader/releases) installed to work.
+Demeo PC Edition game mod. Requires [MelonLoader](https://github.com/LavaGang/MelonLoader/releases) installed to work.
 
 Configurable mod features:
 - Disable auto-delete for saved checkpoints;
@@ -10,13 +10,17 @@ Configurable mod features:
 - Added limit for spawning extra enemies on a level.
 - and more.
 
+## Limitations
+
+- Mod is for private games with friends and solo skirmish;
+- For Steam game version on Windows only;
+- For VR you need to connect your VR device to a PC with Windows OS and play using Steam;
+
 ## Installation
 
-Download zip from [releases page](https://github.com/IDizor/DemeoTuner/releases).
-
-For PC: Unzip and place the `Mods` folder into the Demeo game root folder for all players.
-
-For VR: I had no chance to test it with VR devices. Most likely the mod is not compatible with VR game version. And I'm not sure about MelonLoader VR compatibility as well.
+1. Install mod loader [MelonLoader](https://github.com/LavaGang/MelonLoader/releases) for your Demeo game.
+2. Download mod zip from [releases page](https://github.com/IDizor/DemeoTuner/releases).
+3. Unzip and place the `Mods` folder into the Demeo game root folder.
 
 ## Configuration
 
