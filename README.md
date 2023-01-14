@@ -1,6 +1,6 @@
 # DemeoTuner
 
-Demeo PC Edition game mod. Requires [MelonLoader](https://github.com/LavaGang/MelonLoader/releases) installed to work.
+Demeo game mod. Requires [MelonLoader](https://github.com/LavaGang/MelonLoader/releases) installed to work.
 
 Configurable mod features:
 - Disable auto-delete for saved checkpoints;
